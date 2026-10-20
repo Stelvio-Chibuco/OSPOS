@@ -1,0 +1,32 @@
+include:
+    - docker/docker-mysql.yml
+
+services:
+    sqlscript:
+        build:
+          context: .
+          dockerfile: app/Database/Dockerfile
+        command: /bin/sh -c 'exit 0'
+
+    ospos:
+        build: .
+        restart: always
+        depends_on:
+            - mysql
+        ports:
+            - "80:80"
+        networks:
+            - app_net
+        volumes:
+            - /home/stelvio/Projectos/OSPOS:/app
+            - /home/stelvio/Projectos/OSPOS/uploads:/app/writable/uploads
+            - /home/stelvio/Projectos/OSPOS/logs:/app/writable/logs
+            - /home/stelvio/Projectos/OSPOS/writable/cache:/app/writable/cache
+        environment:
+            - CI_ENVIRONMENT=development
+            - FORCE_HTTPS=false
+            - PHP_TIMEZONE=UTC
+            - MYSQL_USERNAME=admin
+            - MYSQL_PASSWORD=pointofsale
+            - MYSQL_DB_NAME=ospos
+            - MYSQL_HOST_NAME=mysql
